@@ -1,0 +1,41 @@
+# =============================================================================
+# All stacks as a single Compose project
+# -----------------------------------------------------------------------------
+# Run from this folder:
+#   docker compose up -d              start everything
+#   docker compose up -d plex         start (or recreate) a single service
+#   docker compose pull               fetch newer images for every service
+#   docker compose ps                 status of every container
+#   docker compose logs -f sonarr     follow one service's logs
+#
+# Each included file keeps its own folder as the base for relative paths,
+# so ./config, ./data... still resolve inside each service folder.
+#
+# Heads-up:
+# - Use either this file or the per-service folders, not both. Services have
+#   fixed container_name values, so starting the same one from two projects
+#   fails with "container name already in use".
+# - `docker compose down` here stops EVERYTHING, AdGuard included, and the
+#   whole network loses DNS. To stop one service: `docker compose stop <name>`.
+# - Homepage needs homepage/homepage.env first (see homepage.env.example).
+# =============================================================================
+
+name: djberry
+
+include:
+  # Core: DNS first, then the self-healing watchdog
+  - adguardhome/compose.yml
+  - autoheal/compose.yml
+
+  # Access and management
+  - nginx-proxy-manager/compose.yml
+  - homepage/compose.yml
+  - portainer/compose.yml
+
+  # Media
+  - plex/compose.yml
+  - radarr/compose.yml
+  - sonarr/compose.yml
+  - prowlarr/compose.yml
+  - qbittorrent/compose.yml
+  - flaresolverr/compose.yml

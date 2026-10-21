@@ -22,7 +22,7 @@
 
 ## 🎛️ What's running
 
-Every service lives in its own folder under [`docker/`](docker/) with a single `compose.yml`.
+Every service lives in its own folder under [`docker/`](docker/) with a single `compose.yml`, and a root [`docker/compose.yml`](docker/compose.yml) brings them all up with one command.
 
 | | Service | What it does |
 |:---:|---|---|
@@ -91,6 +91,7 @@ Every stack follows the same rules:
 ```
 .
 ├── docker/
+│   ├── compose.yml           ← root project: includes every stack below
 │   ├── adguardhome/          compose.yml
 │   ├── autoheal/             compose.yml
 │   ├── flaresolverr/         compose.yml
@@ -114,46 +115,65 @@ Every stack follows the same rules:
 
 ## 🚀 Quick start
 
-On the server, each stack lives in `~/docker/<service>`:
+Clone the repo, create the Homepage secrets file and start everything from the root project:
 
 ```bash
-cd ~/docker/<service>
+git clone https://github.com/Whuaxu/DjBerry-Homelab.git
+cd DjBerry-Homelab/docker
+
+cp homepage/homepage.env.example homepage/homepage.env
+chmod 600 homepage/homepage.env
+nano homepage/homepage.env        # fill in your keys, passwords and IPs
+
 docker compose up -d
 ```
 
+That's it: one project, every stack. The usual commands work for all services at once, or for just one:
+
+| Command | What it does |
+|---|---|
+| `docker compose up -d` | Start everything |
+| `docker compose up -d plex` | Start (or recreate) a single service |
+| `docker compose ps` | Status of every container |
+| `docker compose logs -f sonarr` | Follow one service's logs |
+| `docker compose stop qbittorrent` | Stop a single service |
+
+> [!WARNING]
+> Fill in real credentials in `homepage.env` before enabling a widget. qBittorrent bans an IP after 5 failed logins, and a misconfigured widget will retry until it gets banned.
+
+> [!CAUTION]
+> `docker compose down` from the root stops **everything**, AdGuard included, so every device on the network loses DNS. Use `docker compose stop <service>` to stop just one.
+
 <details>
-<summary><b>🎛️ Homepage needs one extra step</b></summary>
+<summary><b>🔄 Updating</b></summary>
 
 <br />
 
-Create the secrets file from the template, lock it down and fill it in:
+`:latest` images don't update on their own. Pull the new images and recreate whatever changed:
 
 ```bash
-cd ~/docker/homepage
-cp homepage.env.example homepage.env
-chmod 600 homepage.env
-nano homepage.env
+cd DjBerry-Homelab/docker
+docker compose pull               # or: docker compose pull plex
 docker compose up -d
+docker image prune -f             # remove the old images
 ```
-
-> [!WARNING]
-> Fill in real credentials before enabling a widget. qBittorrent bans an IP after 5 failed logins, and a misconfigured widget will retry until it gets banned.
 
 </details>
 
 <details>
-<summary><b>🔄 Updating a service</b></summary>
+<summary><b>📦 Running a single stack on its own</b></summary>
 
 <br />
 
-`:latest` images don't update on their own. Pull the new image and recreate the container:
+Every folder is also a standalone Compose project, so you can run just the stacks you want:
 
 ```bash
-cd ~/docker/<service>
-docker compose pull
+cd DjBerry-Homelab/docker/adguardhome
 docker compose up -d
-docker image prune -f
 ```
+
+> [!IMPORTANT]
+> Pick **one** way per service: the root project or its own folder, not both. Services have fixed `container_name` values, so starting the same one from two projects fails with *"container name already in use"*.
 
 </details>
 
