@@ -1,0 +1,27 @@
+services:
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    restart: unless-stopped
+    environment:
+      - PUID=996                   # "media" user: no login, no sudo, no Docker
+      - PGID=982
+      - UMASK=002
+      - TZ=Europe/Madrid
+    volumes:
+      - ./config:/config           # Sonarr settings
+      - /srv/data:/data            # library in /data/media/series, downloads in /data/downloads
+    ports:
+      - "0.0.0.0:8989:8989"        # web UI, IPv4 only
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1g
+    cpus: 1
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "-o", "/dev/null", "http://localhost:8989/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    labels:
+      - autoheal=true

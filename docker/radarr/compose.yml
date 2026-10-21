@@ -1,0 +1,27 @@
+services:
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    restart: unless-stopped
+    environment:
+      - PUID=996                   # "media" user: no login, no sudo, no Docker
+      - PGID=982
+      - UMASK=002
+      - TZ=Europe/Madrid
+    volumes:
+      - ./config:/config                                         # Radarr settings
+      - /srv/data:/data            # library in /data/media/movies, downloads in /data/downloads/complete
+    ports:
+      - "0.0.0.0:7878:7878"        # web UI, IPv4 only
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1g
+    cpus: 1
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "-o", "/dev/null", "http://localhost:7878/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    labels:
+      - autoheal=true
