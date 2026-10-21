@@ -1,0 +1,20 @@
+services:
+  adguardhome:
+    image: adguard/adguardhome:latest
+    container_name: adguardhome
+    restart: unless-stopped
+    # host network: AdGuard sees each device's real IP and listens directly on the Pi's port 53
+    network_mode: host
+    volumes:
+      - ./work:/opt/adguardhome/work   # statistics, query logs, downloaded filter lists
+      - ./conf:/opt/adguardhome/conf   # AdGuardHome.yaml (all settings)
+    healthcheck:
+      # Queries AdGuard itself for healthcheck.djberry (blocked by a custom rule, so it answers without internet).
+      # Falls back to localhost. Both are hidden from the query log and statistics.
+      test: ["CMD-SHELL", "nslookup -timeout=3 healthcheck.djberry 127.0.0.1 >/dev/null || nslookup -timeout=3 localhost 127.0.0.1 >/dev/null"]
+      interval: 30s       # how often to check
+      timeout: 10s        # how long to wait for an answer
+      retries: 3          # consecutive failures before marking it "unhealthy"
+      start_period: 30s   # grace period on startup before failures count
+    labels:
+      - autoheal=true     # autoheal restarts it if it becomes "unhealthy"
