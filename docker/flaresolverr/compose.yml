@@ -1,0 +1,27 @@
+services:
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    restart: unless-stopped
+    environment:
+      - LOG_LEVEL=info
+      - LOG_HTML=false
+      - CAPTCHA_SOLVER=none
+      - TZ=Europe/Madrid
+      - PROMETHEUS_ENABLED=true    # metrics on :8192/metrics
+      - PROMETHEUS_PORT=8192
+    ports:
+      - "0.0.0.0:8191:8191"        # API, IPv4 only (LAN + Tailscale), no authentication
+      - "127.0.0.1:8192:8192"      # Prometheus metrics, reachable from the Pi itself only
+    security_opt:
+      - no-new-privileges:true     # the image already runs as a non-root user 
+    mem_limit: 1g                  # ships a full Chromium
+    cpus: 2
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "-o", "/dev/null", "http://localhost:8191/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    labels:
+      - autoheal=true
