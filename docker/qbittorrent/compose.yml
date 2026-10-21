@@ -1,0 +1,32 @@
+services:
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    restart: unless-stopped
+    environment:
+      - PUID=996                   # "media" user: no login, no sudo, no Docker
+      - PGID=982
+      - UMASK=002                  # new files are group-writable (your user can manage them if it is in the media group)
+      - TZ=Europe/Madrid
+      - WEBUI_PORT=8080
+      - TORRENTING_PORT=6881
+    volumes:
+      - ./config:/config           # qBittorrent settings
+      - /srv/data:/data            # data: data/downloads/{complete,incomplete,torrents} and data/media (same filesystem = instant moves)
+    ports:
+      - "0.0.0.0:8080:8080"        # web UI, IPv4 only
+      - "0.0.0.0:6881:6881"        # torrent port, IPv4 only
+      - "0.0.0.0:6881:6881/udp"
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 2g                  # max 2 GB of RAM (disk cache included)
+    cpus: 2                        # max 2 of the 4 cores
+    stop_grace_period: 10s
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "-o", "/dev/null", "http://localhost:8080"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    labels:
+      - autoheal=true
