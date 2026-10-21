@@ -1,0 +1,12 @@
+# Automatically restarts containers labelled autoheal=true when their healthcheck fails
+services:
+  autoheal:
+    image: willfarrell/autoheal:latest
+    container_name: autoheal
+    restart: unless-stopped
+    environment:
+      - AUTOHEAL_CONTAINER_LABEL=autoheal
+      - AUTOHEAL_INTERVAL=10        # check interval, in seconds
+      - AUTOHEAL_START_PERIOD=60    # wait after the Pi boots
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
