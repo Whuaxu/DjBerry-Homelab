@@ -26,16 +26,10 @@
 !/docker/*/*.example
 
 # --- Homepage dashboard config -----------------------------------------------
-# Homepage's YAML/CSS is safe to publish because every private value lives in
+# Homepage's YAML/CSS/JS is safe to publish because every private value lives in
 # homepage.env and is referenced as {{HOMEPAGE_VAR_...}}.
 !/docker/homepage/config/
 /docker/homepage/config/logs/
-# Contains a personal greeting; custom.js.example is the published template.
-/docker/homepage/config/custom.js
-# Empty defaults that Homepage recreates on startup.
-/docker/homepage/config/docker.yaml
-/docker/homepage/config/kubernetes.yaml
-/docker/homepage/config/proxmox.yaml
 
 # --- Safety net --------------------------------------------------------------
 # These rules come last so they win over any "!" rule above. They catch

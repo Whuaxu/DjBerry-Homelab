@@ -1,0 +1,31 @@
+- greeting:
+    text_size: 4xl
+    text: DJBERRY
+
+- datetime:
+    text_size: md
+    format:
+      weekday: long
+      day: numeric
+      month: long
+      hour: 2-digit
+      minute: 2-digit
+      hourCycle: h23
+
+- openmeteo:
+    label: "{{HOMEPAGE_VAR_WEATHER_LABEL}}"
+    latitude: "{{HOMEPAGE_VAR_WEATHER_LAT}}"
+    longitude: "{{HOMEPAGE_VAR_WEATHER_LON}}"
+    timezone: Europe/Madrid
+    units: metric
+    cache: 15
+
+- resources:
+    cpu: true
+    memory: true
+    cputemp: true
+    tempmin: 30
+    tempmax: 85
+    units: metric
+    uptime: true
+    disk: /

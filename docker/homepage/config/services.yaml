@@ -1,0 +1,96 @@
+# href = link opened on click (.lan); url/siteMonitor = internal address Homepage polls
+# id = hook to give each card its own colour in custom.css
+- Multimedia:
+    - Plex:
+        id: plex
+        icon: plex.png
+        href: http://plex.lan/web
+        description: Pelis y series de casa
+        siteMonitor: http://{{HOMEPAGE_VAR_PI_IP}}:32400/identity
+        widget:
+          type: plex
+          url: http://{{HOMEPAGE_VAR_PI_IP}}:32400
+          key: "{{HOMEPAGE_VAR_PLEX_TOKEN}}"
+          fields: ["streams", "movies", "tv"]
+    - Sonarr:
+        id: sonarr
+        icon: sonarr.png
+        href: http://sonarr.lan
+        description: Series
+        siteMonitor: http://{{HOMEPAGE_VAR_PI_IP}}:8989/ping
+        widget:
+          type: sonarr
+          url: http://{{HOMEPAGE_VAR_PI_IP}}:8989
+          key: "{{HOMEPAGE_VAR_SONARR_KEY}}"
+          fields: ["series", "wanted", "queued"]
+    - Radarr:
+        id: radarr
+        icon: radarr.png
+        href: http://radarr.lan
+        description: Películas
+        siteMonitor: http://{{HOMEPAGE_VAR_PI_IP}}:7878/ping
+        widget:
+          type: radarr
+          url: http://{{HOMEPAGE_VAR_PI_IP}}:7878
+          key: "{{HOMEPAGE_VAR_RADARR_KEY}}"
+          fields: ["movies", "wanted", "queued"]
+    - qBittorrent:
+        id: qbittorrent
+        icon: qbittorrent.png
+        href: http://qbittorrent.lan
+        description: Descargas
+        siteMonitor: http://{{HOMEPAGE_VAR_PI_IP}}:8080
+        widget:
+          type: qbittorrent
+          url: http://{{HOMEPAGE_VAR_PI_IP}}:8080
+          username: "{{HOMEPAGE_VAR_QBIT_USER}}"
+          password: "{{HOMEPAGE_VAR_QBIT_PASS}}"
+    - Prowlarr:
+        id: prowlarr
+        icon: prowlarr.png
+        href: http://prowlarr.lan
+        description: Indexadores
+        siteMonitor: http://{{HOMEPAGE_VAR_PI_IP}}:9696/ping
+        widget:
+          type: prowlarr
+          url: http://{{HOMEPAGE_VAR_PI_IP}}:9696
+          key: "{{HOMEPAGE_VAR_PROWLARR_KEY}}"
+          fields: ["numberOfGrabs", "numberOfQueries"]
+
+- Red y seguridad:
+    - AdGuard Home:
+        id: adguard
+        icon: adguard-home.png
+        href: http://adguard.lan
+        description: DNS y anuncios de toda la casa
+        siteMonitor: http://{{HOMEPAGE_VAR_PI_IP}}:3000
+        widget:
+          type: adguard
+          url: http://{{HOMEPAGE_VAR_PI_IP}}:3000
+          username: "{{HOMEPAGE_VAR_ADGUARD_USER}}"
+          password: "{{HOMEPAGE_VAR_ADGUARD_PASS}}"
+    - Nginx Proxy Manager:
+        id: npm
+        icon: nginx-proxy-manager.png
+        href: http://npm.lan
+        description: Nombres .lan
+        siteMonitor: http://{{HOMEPAGE_VAR_PI_IP}}:81
+        widget:
+          type: npm
+          url: http://{{HOMEPAGE_VAR_PI_IP}}:81
+          username: "{{HOMEPAGE_VAR_NPM_EMAIL}}"
+          password: "{{HOMEPAGE_VAR_NPM_PASS}}"
+
+- Sistema:
+    - Portainer:
+        id: portainer
+        icon: portainer.png
+        href: http://portainer.lan
+        description: Contenedores Docker
+        siteMonitor: https://{{HOMEPAGE_VAR_PI_IP}}:9443
+    - Pironman:
+        id: pironman
+        icon: raspberry-pi.png
+        href: http://pironman.lan
+        description: Ventiladores, OLED y LEDs
+        siteMonitor: http://{{HOMEPAGE_VAR_PI_IP}}:34001

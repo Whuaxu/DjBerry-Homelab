@@ -1,0 +1,23 @@
+title: DjBerry
+description: Homelab de casa
+favicon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/raspberry-pi.png
+language: es
+theme: dark
+color: slate
+headerStyle: clean
+statusStyle: dot
+useEqualHeights: true
+hideVersion: true
+target: _blank
+
+layout:
+  Multimedia:
+    icon: mdi-play-circle-outline
+    style: row
+    columns: 3
+  Red y seguridad:
+    icon: mdi-shield-check-outline
+  Sistema:
+    icon: mdi-chip
+  Enlaces:
+    icon: mdi-link-variant

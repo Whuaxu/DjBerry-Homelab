@@ -41,5 +41,4 @@ For Homepage, first:
 
 ```bash
 cp homepage.env.example homepage.env && chmod 600 homepage.env   # then fill it in
-cp config/custom.js.example config/custom.js
 ```

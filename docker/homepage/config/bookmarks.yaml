@@ -1,0 +1,17 @@
+- Enlaces:
+    - Router:
+        - icon: mdi-router-wireless
+          href: http://{{HOMEPAGE_VAR_ROUTER_IP}}
+          description: "{{HOMEPAGE_VAR_ROUTER_IP}}"
+    - Tailscale:
+        - icon: tailscale.png
+          href: https://login.tailscale.com/admin/machines
+          description: Dispositivos
+    - Plex.tv:
+        - icon: plex.png
+          href: https://app.plex.tv
+          description: Watchlist
+    - Homepage:
+        - icon: homepage.png
+          href: https://gethomepage.dev/configs/services/
+          description: Docs

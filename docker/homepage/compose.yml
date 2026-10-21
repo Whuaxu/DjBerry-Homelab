@@ -1,0 +1,28 @@
+services:
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    restart: unless-stopped
+    environment:
+      - PUID=1001                  # your user: lets you edit ./config without sudo
+      - PGID=1001
+      - TZ=Europe/Madrid
+    env_file:
+      - ./homepage.env             # API keys and passwords (chmod 600, never share)
+    volumes:
+      - ./config:/app/config       # settings/services/widgets.yaml
+    ports:
+      - "0.0.0.0:3010:3000"        # web UI, IPv4 only (hub.lan via NPM)
+    # no docker.sock on purpose: status comes from siteMonitor
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 256m
+    cpus: 1
+    healthcheck:
+      test: ["CMD", "wget", "-qO", "/dev/null", "http://127.0.0.1:3000/api/healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    labels:
+      - autoheal=true
