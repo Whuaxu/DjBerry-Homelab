@@ -1,0 +1,75 @@
+# =============================================================================
+# Allowlist .gitignore
+# -----------------------------------------------------------------------------
+# This repo is PUBLIC. Everything is ignored by default and only the files
+# explicitly re-included below are tracked. A new file never gets committed
+# by accident: to publish it, add a "!" rule for it on purpose.
+#
+# Note: git cannot re-include a file whose parent directory is ignored, so
+# each "!" rule opens one level at a time.
+# =============================================================================
+
+# --- Repo root ---------------------------------------------------------------
+# Ignore everything at the top level (private notes, .docx, .claude/,
+# .playwright-mcp/, ...) except the repo metadata and the docker/ tree.
+/*
+!/.gitignore
+!/README.md
+!/docker/
+
+# --- Service stacks (docker/<service>/) --------------------------------------
+# Inside each service folder, only the Compose file and the *.example
+# templates are published. Runtime state stays out: config/, data/, conf/,
+# work/, transcode/, letsencrypt/ hold databases, API keys and certificates.
+/docker/*/*
+!/docker/*/compose.yml
+!/docker/*/*.example
+
+# --- Homepage dashboard config -----------------------------------------------
+# Homepage's YAML/CSS is safe to publish because every private value lives in
+# homepage.env and is referenced as {{HOMEPAGE_VAR_...}}.
+!/docker/homepage/config/
+/docker/homepage/config/logs/
+# Contains a personal greeting; custom.js.example is the published template.
+/docker/homepage/config/custom.js
+# Empty defaults that Homepage recreates on startup.
+/docker/homepage/config/docker.yaml
+/docker/homepage/config/kubernetes.yaml
+/docker/homepage/config/proxmox.yaml
+
+# --- Safety net --------------------------------------------------------------
+# These rules come last so they win over any "!" rule above. They catch
+# secrets and state even if they end up inside an allowlisted folder.
+
+# Environment files with real values (templates end in .example)
+.env
+.env.*
+*.env
+!*.example
+
+# Keys and certificates
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+
+# Databases, logs and backups
+*.db
+*.sqlite
+*.sqlite3
+*.log
+*.bak
+*.bak-*
+*.old
+*.orig
+*.swp
+*~
+
+# OS and editor clutter
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
