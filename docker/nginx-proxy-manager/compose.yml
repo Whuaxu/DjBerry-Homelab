@@ -1,0 +1,20 @@
+services:
+  npm:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: nginx-proxy-manager
+    restart: unless-stopped
+    ports:
+      - "80:80"     # HTTP: adguard.lan, portainer.lan... arrive here
+      - "443:443"   # HTTPS (for when there are certificates)
+      - "81:81"     # NPM admin UI
+    volumes:
+      - ./data:/data                  # NPM settings and database
+      - ./letsencrypt:/etc/letsencrypt
+    healthcheck:
+      test: ["CMD", "/usr/bin/check-health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    labels:
+      - autoheal=true
