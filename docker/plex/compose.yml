@@ -1,0 +1,28 @@
+services:
+  plex:
+    image: lscr.io/linuxserver/plex:latest
+    container_name: plex
+    network_mode: host             # Plex sees the real network: home devices count as "local" (free) and players discover it automatically
+    restart: unless-stopped
+    environment:
+      - PUID=996                   # "media" user: no login, no sudo, no Docker
+      - PGID=982
+      - UMASK=002
+      - TZ=Europe/Madrid
+      - VERSION=docker             # Plex updates with the image, never by itself
+    volumes:
+      - ./config:/config                    # database, artwork, settings
+      - ./transcode:/transcode              # transcoding temp files
+      - /srv/data/media:/data/media:ro      # movies and TV shows, READ-ONLY
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 2g
+    cpus: 3                        # leaves one core free for AdGuard and the rest
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "-o", "/dev/null", "http://localhost:32400/identity"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+    labels:
+      - autoheal=true
