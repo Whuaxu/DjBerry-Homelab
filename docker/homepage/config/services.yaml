@@ -34,6 +34,16 @@
           url: http://{{HOMEPAGE_VAR_PI_IP}}:7878
           key: "{{HOMEPAGE_VAR_RADARR_KEY}}"
           fields: ["movies", "wanted", "queued"]
+    - Bazarr:
+        id: bazarr
+        icon: bazarr.png
+        href: http://bazarr.lan
+        description: Subtítulos
+        siteMonitor: http://{{HOMEPAGE_VAR_PI_IP}}:6767/api/system/ping
+        widget:
+          type: bazarr
+          url: http://{{HOMEPAGE_VAR_PI_IP}}:6767
+          key: "{{HOMEPAGE_VAR_BAZARR_KEY}}"
     - qBittorrent:
         id: qbittorrent
         icon: qbittorrent.png
