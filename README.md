@@ -32,6 +32,7 @@ Every service lives in its own folder under [`docker/`](docker/) with a single `
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/plex.svg" width="32" /> | [**Plex**](docker/plex/compose.yml) | Media server for the TVs and phones at home |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/radarr.svg" width="32" /> | [**Radarr**](docker/radarr/compose.yml) | Movie library management |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/sonarr.svg" width="32" /> | [**Sonarr**](docker/sonarr/compose.yml) | TV library management and calendar |
+| <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/bazarr.svg" width="32" /> | [**Bazarr**](docker/bazarr/compose.yml) | Subtitles for the movie and TV library |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/prowlarr.svg" width="32" /> | [**Prowlarr**](docker/prowlarr/compose.yml) | Indexer manager |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/qbittorrent.svg" width="32" /> | [**qBittorrent**](docker/qbittorrent/compose.yml) | Download client with minimal seeding |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/flaresolverr.svg" width="32" /> | [**FlareSolverr**](docker/flaresolverr/compose.yml) | Helper proxy for Prowlarr *(testing)* |
@@ -56,6 +57,7 @@ flowchart LR
         subgraph media["🎬 Media stack"]
             PR["Prowlarr"]
             RS["Radarr · Sonarr"]
+            BZ["Bazarr<br/>subtitles"]
             QB["qBittorrent"]
             PX["Plex"]
         end
@@ -67,8 +69,9 @@ flowchart LR
     D -- "http://service.lan" --> NPM
     VPN -.-> AG
     VPN -.-> NPM
-    NPM --> HP & PT & RS & PX
+    NPM --> HP & PT & RS & BZ & PX
     PR --> RS --> QB --> DATA
+    RS --> BZ -- "subtitles" --> DATA
     DATA -- "read-only" --> PX
 ```
 
@@ -94,6 +97,7 @@ Every stack follows the same rules:
 │   ├── compose.yml           ← root project: includes every stack below
 │   ├── adguardhome/          compose.yml
 │   ├── autoheal/             compose.yml
+│   ├── bazarr/               compose.yml
 │   ├── flaresolverr/         compose.yml
 │   ├── homepage/
 │   │   ├── compose.yml

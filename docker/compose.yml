@@ -36,6 +36,7 @@ include:
   - plex/compose.yml
   - radarr/compose.yml
   - sonarr/compose.yml
+  - bazarr/compose.yml
   - prowlarr/compose.yml
   - qbittorrent/compose.yml
   - flaresolverr/compose.yml

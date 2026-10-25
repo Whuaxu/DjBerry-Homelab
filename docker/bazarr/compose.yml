@@ -1,0 +1,27 @@
+services:
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    restart: unless-stopped
+    environment:
+      - PUID=996                   # "media" user: no login, no sudo, no Docker
+      - PGID=982
+      - UMASK=002
+      - TZ=Europe/Madrid
+    volumes:
+      - ./config:/config           # Bazarr settings
+      - /srv/data/media:/data/media  # library only (writes .srt next to the videos); same paths as Radarr/Sonarr
+    ports:
+      - "0.0.0.0:6767:6767"        # web UI, IPv4 only
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1g
+    cpus: 1
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "-o", "/dev/null", "http://localhost:6767/api/system/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    labels:
+      - autoheal=true
