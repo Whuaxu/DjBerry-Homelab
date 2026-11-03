@@ -101,6 +101,9 @@ li.service > div::before {
 .djb-tagline { font-size: 0.78rem; color: var(--fg); margin-top: 0.7rem; letter-spacing: 0.12em; }
 #information-widgets .text-xs, #information-widgets .text-sm, #information-widgets .text-md { text-transform: uppercase; letter-spacing: 0.05em; }
 #information-widgets .information-widget-datetime, #information-widgets .information-widget-datetime * { text-transform: uppercase; font-size: 0.85rem !important; }
+/* Date + weather always on their own line; otherwise they jump up next to the
+   metrics whenever the metric values get a few pixels narrower */
+#information-widgets-right { flex-basis: 100% !important; }
 
 /* --- Groups numbered like pads (01 MULTIMEDIA ...) --- */
 #inner_wrapper { counter-reset: pad; }
