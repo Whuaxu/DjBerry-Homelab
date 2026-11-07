@@ -1,0 +1,39 @@
+# WAHA: WhatsApp HTTP API with the GOWS engine (no browser). Bots talk to it over HTTP.
+services:
+  waha:
+    image: devlikeapro/waha:gows-arm-2026.10.1  # ARM64 + GOWS (latest/gows/noweb are amd64 only). Pinned: bump the tag by hand
+    container_name: waha
+    restart: unless-stopped
+    user: "1001:1001"              # your user: the image runs as root unless told otherwise
+    env_file:
+      - waha.env                   # API key and dashboard passwords (see waha.env.example)
+    environment:
+      - TZ=Europe/Madrid
+      - WHATSAPP_DEFAULT_ENGINE=GOWS
+      - WAHA_BASE_URL=http://waha:3000     # file URLs in webhooks, as seen from the Docker network (for the bot)
+      - WAHA_API_KEY_EXCLUDE_PATH=ping     # only /ping skips the API key, for the healthcheck
+      - WAHA_LOG_FORMAT=PRETTY
+      - WAHA_LOG_LEVEL=info
+      - WAHA_PRINT_QR=False        # scan the QR from the dashboard instead
+    volumes:
+      - ./sessions:/app/.sessions  # linked WhatsApp account: lose it and you have to scan the QR again
+      - ./media:/app/.media        # received photos and voice notes
+    ports:
+      - "0.0.0.0:3020:3000"        # dashboard + API, IPv4 only (3000 is taken by AdGuard)
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1g
+    cpus: 1
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "-o", "/dev/null", "http://localhost:3000/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    labels:
+      - autoheal=true

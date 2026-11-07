@@ -12,7 +12,7 @@
 <img src="https://img.shields.io/badge/Docker%20Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker Compose" />
 <img src="https://img.shields.io/badge/Raspberry%20Pi%20OS-Debian-A81D33?style=for-the-badge&logo=debian&logoColor=white" alt="Raspberry Pi OS (Debian)" />
 <br />
-<img src="https://img.shields.io/badge/services-11-2fd158?style=for-the-badge&labelColor=0d0d0f" alt="11 services" />
+<img src="https://img.shields.io/badge/services-13-2fd158?style=for-the-badge&labelColor=0d0d0f" alt="13 services" />
 <img src="https://img.shields.io/badge/open%20ports-0-ff9500?style=for-the-badge&labelColor=0d0d0f" alt="0 open ports" />
 <img src="https://img.shields.io/badge/secrets%20in%20repo-0-ff3b30?style=for-the-badge&labelColor=0d0d0f" alt="0 secrets in repo" />
 
@@ -36,6 +36,7 @@ Every service lives in its own folder under [`docker/`](docker/) with a single `
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/prowlarr.svg" width="32" /> | [**Prowlarr**](docker/prowlarr/compose.yml) | Indexer manager |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/qbittorrent.svg" width="32" /> | [**qBittorrent**](docker/qbittorrent/compose.yml) | Download client with minimal seeding |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/flaresolverr.svg" width="32" /> | [**FlareSolverr**](docker/flaresolverr/compose.yml) | Helper proxy for Prowlarr *(testing)* |
+| <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/whatsapp.svg" width="32" /> | [**WAHA**](docker/waha/compose.yml) | WhatsApp HTTP API (GOWS engine, no browser) for a self-hosted bot |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/portainer.svg" width="32" /> | [**Portainer**](docker/portainer/compose.yml) | Web UI to manage Docker |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/healthchecks.svg" width="32" /> | [**autoheal**](docker/autoheal/compose.yml) | Restarts any container whose healthcheck fails |
 
@@ -63,7 +64,11 @@ flowchart LR
         end
 
         DATA[("💾 /srv/data<br/>media + downloads")]
+
+        WA["💬 WAHA<br/>WhatsApp HTTP API"]
     end
+
+    WAC["☁️ WhatsApp"]
 
     D -- "DNS :53" --> AG
     D -- "http://service.lan" --> NPM
@@ -73,6 +78,7 @@ flowchart LR
     PR --> RS --> QB --> DATA
     RS --> BZ -- "subtitles" --> DATA
     DATA -- "read-only" --> PX
+    WA -- "outbound only" --> WAC
 ```
 
 ## 🛡️ Security by default
@@ -109,7 +115,10 @@ Every stack follows the same rules:
 │   ├── prowlarr/             compose.yml
 │   ├── qbittorrent/          compose.yml
 │   ├── radarr/               compose.yml
-│   └── sonarr/               compose.yml
+│   ├── sonarr/               compose.yml
+│   └── waha/
+│       ├── compose.yml
+│       └── waha.env.example       ← template for the API key and passwords
 ├── .gitignore                ← allowlist: only the files above get published
 └── README.md
 ```
@@ -119,7 +128,7 @@ Every stack follows the same rules:
 
 ## 🚀 Quick start
 
-Clone the repo, create the Homepage secrets file and start everything from the root project:
+Clone the repo, create the Homepage and WAHA secrets files and start everything from the root project:
 
 ```bash
 git clone https://github.com/Whuaxu/DjBerry-Homelab.git
@@ -128,6 +137,10 @@ cd DjBerry-Homelab/docker
 cp homepage/homepage.env.example homepage/homepage.env
 chmod 600 homepage/homepage.env
 nano homepage/homepage.env        # fill in your keys, passwords and IPs
+
+cp waha/waha.env.example waha/waha.env
+chmod 600 waha/waha.env
+nano waha/waha.env                # API key and dashboard passwords
 
 docker compose up -d
 ```

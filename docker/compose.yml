@@ -17,7 +17,8 @@
 #   fails with "container name already in use".
 # - `docker compose down` here stops EVERYTHING, AdGuard included, and the
 #   whole network loses DNS. To stop one service: `docker compose stop <name>`.
-# - Homepage needs homepage/homepage.env first (see homepage.env.example).
+# - Homepage needs homepage/homepage.env first (see homepage.env.example),
+#   and WAHA needs waha/waha.env (see waha.env.example).
 # =============================================================================
 
 name: djberry
@@ -40,3 +41,6 @@ include:
   - prowlarr/compose.yml
   - qbittorrent/compose.yml
   - flaresolverr/compose.yml
+
+  # Bots
+  - waha/compose.yml
