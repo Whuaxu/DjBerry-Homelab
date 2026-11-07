@@ -15,6 +15,8 @@ services:
       - WAHA_LOG_FORMAT=PRETTY
       - WAHA_LOG_LEVEL=info
       - WAHA_PRINT_QR=False        # scan the QR from the dashboard instead
+      - WHATSAPP_HOOK_URL=http://bot:3000/webhook  # tell the bot about every incoming message
+      - WHATSAPP_HOOK_EVENTS=message.any   # incoming + own messages (own ones only count in the chat with yourself)
     volumes:
       - ./sessions:/app/.sessions  # linked WhatsApp account: lose it and you have to scan the QR again
       - ./media:/app/.media        # received photos and voice notes
@@ -35,5 +37,39 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
+    labels:
+      - autoheal=true
+
+  # The bot: receives WAHA's webhooks and answers through its API. No published
+  # ports: only containers on this stack's network can reach it.
+  bot:
+    build: ./bot
+    image: waha-bot:local
+    container_name: waha-bot
+    restart: unless-stopped
+    init: true                     # tini as PID 1: forwards signals, so it stops instantly
+    env_file:
+      - bot.env                    # WAHA API key and allowed numbers (see bot.env.example)
+    environment:
+      - TZ=Europe/Madrid
+      - WAHA_URL=http://waha:3000
+    read_only: true                # stateless: never writes to disk
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 128m
+    cpus: 0.5
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     labels:
       - autoheal=true
