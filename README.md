@@ -12,7 +12,7 @@
 <img src="https://img.shields.io/badge/Docker%20Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker Compose" />
 <img src="https://img.shields.io/badge/Raspberry%20Pi%20OS-Debian-A81D33?style=for-the-badge&logo=debian&logoColor=white" alt="Raspberry Pi OS (Debian)" />
 <br />
-<img src="https://img.shields.io/badge/services-13-2fd158?style=for-the-badge&labelColor=0d0d0f" alt="13 services" />
+<img src="https://img.shields.io/badge/services-14-2fd158?style=for-the-badge&labelColor=0d0d0f" alt="14 services" />
 <img src="https://img.shields.io/badge/open%20ports-0-ff9500?style=for-the-badge&labelColor=0d0d0f" alt="0 open ports" />
 <img src="https://img.shields.io/badge/secrets%20in%20repo-0-ff3b30?style=for-the-badge&labelColor=0d0d0f" alt="0 secrets in repo" />
 
@@ -37,6 +37,7 @@ Every service lives in its own folder under [`docker/`](docker/) with a single `
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/qbittorrent.svg" width="32" /> | [**qBittorrent**](docker/qbittorrent/compose.yml) | Download client with minimal seeding |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/flaresolverr.svg" width="32" /> | [**FlareSolverr**](docker/flaresolverr/compose.yml) | Helper proxy for Prowlarr *(testing)* |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/whatsapp.svg" width="32" /> | [**WAHA**](docker/waha/compose.yml) | WhatsApp HTTP API (GOWS engine, no browser) plus a small [bot](docker/waha/bot/index.js) that answers through it |
+| <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/uptime-kuma.svg" width="32" /> | [**Uptime Kuma**](docker/uptime-kuma/compose.yml) | Checks every service and sends a WhatsApp alert (via WAHA) when one goes down |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/portainer.svg" width="32" /> | [**Portainer**](docker/portainer/compose.yml) | Web UI to manage Docker |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/healthchecks.svg" width="32" /> | [**autoheal**](docker/autoheal/compose.yml) | Restarts any container whose healthcheck fails |
 
@@ -65,6 +66,7 @@ flowchart LR
 
         DATA[("💾 /srv/data<br/>media + downloads")]
 
+        UK["📟 Uptime Kuma<br/>checks + alerts"]
         WA["💬 WAHA<br/>WhatsApp HTTP API"]
         BOT["🤖 Bot<br/>no published ports"]
     end
@@ -81,6 +83,7 @@ flowchart LR
     DATA -- "read-only" --> PX
     WA -- "outbound only" --> WAC
     WA <-- "webhook · API" --> BOT
+    UK -- "alerts" --> WA
 ```
 
 ## 🛡️ Security by default
@@ -118,6 +121,7 @@ Every stack follows the same rules:
 │   ├── qbittorrent/          compose.yml
 │   ├── radarr/               compose.yml
 │   ├── sonarr/               compose.yml
+│   ├── uptime-kuma/          compose.yml
 │   └── waha/
 │       ├── compose.yml            ← WAHA + the bot
 │       ├── waha.env.example       ← template for the API key and passwords

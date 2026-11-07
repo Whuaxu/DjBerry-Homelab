@@ -32,6 +32,7 @@ include:
   - nginx-proxy-manager/compose.yml
   - homepage/compose.yml
   - portainer/compose.yml
+  - uptime-kuma/compose.yml
 
   # Media
   - plex/compose.yml

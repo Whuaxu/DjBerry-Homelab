@@ -1,0 +1,25 @@
+# Uptime Kuma: checks that every service answers and alerts over WhatsApp (via WAHA) when something goes down
+services:
+  uptime-kuma:
+    image: louislam/uptime-kuma:2.5.9-slim-rootless  # slim: no Chromium or MariaDB; rootless: no root. Pinned: bump the tag by hand
+    container_name: uptime-kuma
+    restart: unless-stopped
+    user: "1001:1001"              # your user: you own the data folder (backups without sudo)
+    environment:
+      - TZ=Europe/Madrid
+    volumes:
+      - ./data:/app/data           # SQLite database, monitors and settings (chmod 700)
+    ports:
+      - "0.0.0.0:3001:3001"        # web UI, IPv4 only
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512m
+    cpus: 1
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    # healthcheck: the one shipped with the image (extra/healthcheck)
+    labels:
+      - autoheal=true
