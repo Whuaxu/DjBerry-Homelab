@@ -104,3 +104,35 @@
         href: http://pironman.lan
         description: Ventiladores, OLED y LEDs
         siteMonitor: http://{{HOMEPAGE_VAR_PI_IP}}:34001
+
+- Bots:
+    - WhatsApp:
+        id: waha
+        icon: whatsapp.png
+        href: http://{{HOMEPAGE_VAR_PI_IP}}:3020/dashboard
+        description: WAHA + bot de avisos
+        siteMonitor: http://{{HOMEPAGE_VAR_PI_IP}}:3020/ping
+        widget:
+          type: customapi
+          url: http://{{HOMEPAGE_VAR_PI_IP}}:3020/api/sessions/work
+          headers:
+            X-Api-Key: "{{HOMEPAGE_VAR_WAHA_KEY}}"
+          mappings:
+            - field: status
+              label: Sesión
+              remap:
+                - value: WORKING
+                  to: Conectada
+                - value: SCAN_QR_CODE
+                  to: Escanear QR
+                - value: STARTING
+                  to: Arrancando
+                - value: STOPPED
+                  to: Parada
+                - value: FAILED
+                  to: Error
+                - any: true
+                  to: Desconocido
+            - field:
+                me: pushName
+              label: Cuenta

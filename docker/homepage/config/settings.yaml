@@ -19,5 +19,7 @@ layout:
     icon: mdi-shield-check-outline
   Sistema:
     icon: mdi-chip
+  Bots:
+    icon: mdi-robot-outline
   Enlaces:
     icon: mdi-link-variant
