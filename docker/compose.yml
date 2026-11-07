@@ -18,7 +18,7 @@
 # - `docker compose down` here stops EVERYTHING, AdGuard included, and the
 #   whole network loses DNS. To stop one service: `docker compose stop <name>`.
 # - Homepage needs homepage/homepage.env first (see homepage.env.example),
-#   and WAHA needs waha/waha.env (see waha.env.example).
+#   and WAHA needs waha/waha.env and waha/bot.env (see the *.example files).
 # =============================================================================
 
 name: djberry

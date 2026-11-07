@@ -31,6 +31,12 @@
 !/docker/homepage/config/
 /docker/homepage/config/logs/
 
+# --- WAHA bot source code ----------------------------------------------------
+# The bot is our own code (Dockerfile + JS), so the whole folder is published.
+# Its settings live in docker/waha/bot.env, which stays ignored.
+!/docker/waha/bot/
+/docker/waha/bot/node_modules/
+
 # --- Safety net --------------------------------------------------------------
 # These rules come last so they win over any "!" rule above. They catch
 # secrets and state even if they end up inside an allowlisted folder.

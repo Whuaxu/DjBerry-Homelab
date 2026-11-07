@@ -36,7 +36,7 @@ Every service lives in its own folder under [`docker/`](docker/) with a single `
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/prowlarr.svg" width="32" /> | [**Prowlarr**](docker/prowlarr/compose.yml) | Indexer manager |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/qbittorrent.svg" width="32" /> | [**qBittorrent**](docker/qbittorrent/compose.yml) | Download client with minimal seeding |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/flaresolverr.svg" width="32" /> | [**FlareSolverr**](docker/flaresolverr/compose.yml) | Helper proxy for Prowlarr *(testing)* |
-| <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/whatsapp.svg" width="32" /> | [**WAHA**](docker/waha/compose.yml) | WhatsApp HTTP API (GOWS engine, no browser) for a self-hosted bot |
+| <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/whatsapp.svg" width="32" /> | [**WAHA**](docker/waha/compose.yml) | WhatsApp HTTP API (GOWS engine, no browser) plus a small [bot](docker/waha/bot/index.js) that answers through it |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/portainer.svg" width="32" /> | [**Portainer**](docker/portainer/compose.yml) | Web UI to manage Docker |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/healthchecks.svg" width="32" /> | [**autoheal**](docker/autoheal/compose.yml) | Restarts any container whose healthcheck fails |
 
@@ -66,6 +66,7 @@ flowchart LR
         DATA[("💾 /srv/data<br/>media + downloads")]
 
         WA["💬 WAHA<br/>WhatsApp HTTP API"]
+        BOT["🤖 Bot<br/>no published ports"]
     end
 
     WAC["☁️ WhatsApp"]
@@ -79,6 +80,7 @@ flowchart LR
     RS --> BZ -- "subtitles" --> DATA
     DATA -- "read-only" --> PX
     WA -- "outbound only" --> WAC
+    WA <-- "webhook · API" --> BOT
 ```
 
 ## 🛡️ Security by default
@@ -117,8 +119,10 @@ Every stack follows the same rules:
 │   ├── radarr/               compose.yml
 │   ├── sonarr/               compose.yml
 │   └── waha/
-│       ├── compose.yml
-│       └── waha.env.example       ← template for the API key and passwords
+│       ├── compose.yml            ← WAHA + the bot
+│       ├── waha.env.example       ← template for the API key and passwords
+│       ├── bot.env.example        ← template for the bot's key and allowed numbers
+│       └── bot/                   ← the bot's code: Dockerfile + index.js
 ├── .gitignore                ← allowlist: only the files above get published
 └── README.md
 ```
@@ -139,8 +143,10 @@ chmod 600 homepage/homepage.env
 nano homepage/homepage.env        # fill in your keys, passwords and IPs
 
 cp waha/waha.env.example waha/waha.env
-chmod 600 waha/waha.env
+cp waha/bot.env.example waha/bot.env
+chmod 600 waha/waha.env waha/bot.env
 nano waha/waha.env                # API key and dashboard passwords
+nano waha/bot.env                 # same API key + numbers allowed to use the bot
 
 docker compose up -d
 ```
