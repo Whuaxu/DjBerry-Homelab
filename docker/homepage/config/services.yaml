@@ -104,12 +104,18 @@
         href: http://pironman.lan
         description: Ventiladores, OLED y LEDs
         siteMonitor: http://{{HOMEPAGE_VAR_PI_IP}}:34001
+    - Uptime Kuma:
+        id: uptime-kuma
+        icon: uptime-kuma.png
+        href: http://kuma.lan
+        description: Vigila los servicios y avisa por WhatsApp
+        siteMonitor: http://{{HOMEPAGE_VAR_PI_IP}}:3001
 
 - Bots:
     - WhatsApp:
         id: waha
         icon: whatsapp.png
-        href: http://{{HOMEPAGE_VAR_PI_IP}}:3020/dashboard
+        href: http://waha.lan/dashboard
         description: WAHA + bot de avisos
         siteMonitor: http://{{HOMEPAGE_VAR_PI_IP}}:3020/ping
         widget:
