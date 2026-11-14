@@ -36,7 +36,7 @@ Every service lives in its own folder under [`docker/`](docker/) with a single `
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/prowlarr.svg" width="32" /> | [**Prowlarr**](docker/prowlarr/compose.yml) | Indexer manager |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/qbittorrent.svg" width="32" /> | [**qBittorrent**](docker/qbittorrent/compose.yml) | Download client with minimal seeding |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/flaresolverr.svg" width="32" /> | [**FlareSolverr**](docker/flaresolverr/compose.yml) | Helper proxy for Prowlarr |
-| <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/whatsapp.svg" width="32" /> | [**WAHA**](docker/waha/compose.yml) | WhatsApp HTTP API (GOWS engine, no browser) plus a small [bot](docker/waha/bot/index.js) that answers through it |
+| <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/whatsapp.svg" width="32" /> | [**WAHA**](docker/waha/compose.yml) | WhatsApp HTTP API (GOWS engine, no browser) plus a small [bot](docker/waha/bot/index.js) that answers through it (`/status` lists every service's health from Uptime Kuma, `/jitsi` posts a Jitsi meeting link in any chat, `/help` lists the commands) |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/uptime-kuma.svg" width="32" /> | [**Uptime Kuma**](docker/uptime-kuma/compose.yml) | Checks every service and sends a WhatsApp alert (via WAHA) when one goes down |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/portainer.svg" width="32" /> | [**Portainer**](docker/portainer/compose.yml) | Web UI to manage Docker |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/healthchecks.svg" width="32" /> | [**autoheal**](docker/autoheal/compose.yml) | Restarts any container whose healthcheck fails |
@@ -84,6 +84,7 @@ flowchart LR
     WA -- "outbound only" --> WAC
     WA <-- "webhook · API" --> BOT
     UK -- "alerts" --> WA
+    BOT -- "/status · /metrics" --> UK
 ```
 
 ## 🛡️ Security by default
@@ -150,7 +151,7 @@ cp waha/waha.env.example waha/waha.env
 cp waha/bot.env.example waha/bot.env
 chmod 600 waha/waha.env waha/bot.env
 nano waha/waha.env                # API key and dashboard passwords
-nano waha/bot.env                 # same API key + numbers allowed to use the bot
+nano waha/bot.env                 # same API key + numbers allowed to use the bot + Kuma key for /status
 
 docker compose up -d
 ```

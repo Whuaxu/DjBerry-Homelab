@@ -103,33 +103,170 @@ const mask = (s) => String(s).replace(/\d{5,}/g, (d) => `${d.slice(0, 4)}…${d.
 async function onMessage(session, msg, me) {
   const text = (msg.body || '').trim().toLowerCase();
 
-  // A reminder's "done" command (e.g. !agua) also works inside the reminder's
+  // A reminder's "done" command (e.g. /agua) also works inside the reminder's
   // own chat, for anyone in it, so whoever did the task can tick it off.
   const chat = chatOf(msg);
   if (await markReminderDone(session, chat, msg, text, !msg.fromMe, true)) return;
 
   if (msg.fromMe) {
+    // /jitsi is the one command that works in ANY chat, but only when you
+    // write it from the linked phone: the link goes to that same chat.
+    const room = jitsiRoom(text);
+    if (room !== null && chat) {
+      await waha('POST', '/api/sendText', { session, chatId: chat, text: `📹 Reunión: ${room}` });
+      console.log('/jitsi link sent');
+      return;
+    }
+
     const self = await isSelfChat(session, msg, me);
-    if (DEBUG) console.log(`[debug] own message chat=${mask(chat)} selfChat=${self} isPing=${text === 'ping'}`);
+    if (DEBUG) console.log(`[debug] own message chat=${mask(chat)} selfChat=${self} isPing=${text === '/ping'}`);
     if (!self) return;
     return runCommand(session, chat, msg, text, false);
   }
 
   const phone = await phoneOf(session, msg.from);
   if (DEBUG) {
-    console.log(`[debug] from=${mask(msg.from)} phone=${phone ? mask(phone) : 'unknown'} allowed=${ALLOWED_NUMBERS.has(phone)} isPing=${text === 'ping'}`);
+    console.log(`[debug] from=${mask(msg.from)} phone=${phone ? mask(phone) : 'unknown'} allowed=${ALLOWED_NUMBERS.has(phone)} isPing=${text === '/ping'}`);
   }
   if (!phone || !ALLOWED_NUMBERS.has(phone)) return;
   return runCommand(session, msg.from, msg, text, true);
 }
 
 async function runCommand(session, chatId, msg, text, markSeen) {
-  if (text === 'ping') {
+  if (text === '/ping') {
     await reply(session, chatId, msg, 'pong', markSeen);
-    console.log('ping -> pong');
+    console.log('/ping -> pong');
+    return;
+  }
+  const room = jitsiRoom(text);
+  if (room !== null) {
+    await reply(session, chatId, msg, `📹 Reunión: ${room}`, markSeen);
+    console.log('/jitsi link sent');
+    return;
+  }
+  if (text === '/status') {
+    await reply(session, chatId, msg, await statusReport(), markSeen);
+    console.log('/status answered');
+    return;
+  }
+  if (text === '/help') {
+    await reply(session, chatId, msg, helpText(), markSeen);
+    console.log('/help answered');
     return;
   }
   await markReminderDone(session, chatId, msg, text, markSeen, false);
+}
+
+// Command list. Reminder "done" commands come from DAILY_REMINDERS, so the
+// list is always up to date with bot.env.
+function helpText() {
+  const lines = [
+    '🤖 *Comandos*',
+    '',
+    '/status — estado de cada servicio (Uptime Kuma)',
+    '/jitsi [nombre] — enlace de reunión; desde tu móvil funciona en cualquier chat',
+    '/ping — comprobar que el bot responde',
+    '/help — esta lista',
+  ];
+  const done = DAILY_REMINDERS.filter((r) => r.doneCommand);
+  if (done.length > 0) {
+    lines.push('', '⏰ *Recordatorios*');
+    for (const r of done) lines.push(`${r.doneCommand} — marca como hecho el aviso de las ${r.time}`);
+  }
+  return lines.join('\n');
+}
+
+// --- /jitsi: meeting links ---------------------------------------------------------
+// "/jitsi", optionally with a name: "/jitsi daily" -> .../daily-k3j9x2m4qa
+// The random suffix keeps rooms from being guessed (anyone with the link can join).
+
+const JITSI_URL = (process.env.JITSI_URL || 'https://meet.jit.si').replace(/\/+$/, '');
+
+// Meeting URL for a /jitsi command, or null if the text is not one
+function jitsiRoom(text) {
+  const m = text.match(/^\/jitsi(?:\s+(.*))?$/);
+  if (!m) return null;
+  const name = (m[1] || '')
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')   // "reunión" -> "reunion"
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+    .slice(0, 40) || 'reunion';
+  const suffix = require('node:crypto').randomBytes(8).toString('hex').slice(0, 10);
+  return `${JITSI_URL}/${name}-${suffix}`;
+}
+
+// --- /status: service health from Uptime Kuma ----------------------------------
+// Reads Kuma's Prometheus endpoint (/metrics), which is read-only. The API key
+// goes as the password of HTTP Basic auth, with an empty user name.
+
+const KUMA_URL = process.env.KUMA_URL || '';
+const KUMA_API_KEY = process.env.KUMA_API_KEY || '';
+
+// Kuma's monitor_status values
+const KUMA_STATES = {
+  0: { icon: '🔴', label: 'caído', rank: 0 },
+  2: { icon: '🟡', label: 'pendiente', rank: 1 },
+  3: { icon: '🔧', label: 'mantenimiento', rank: 2 },
+  1: { icon: '✅', label: 'ok', rank: 3 },
+};
+
+// Value of one label in a Prometheus line, e.g. monitor_name="AdGuard web"
+function labelOf(labels, name) {
+  const m = labels.match(new RegExp(`(?:^|,)${name}="((?:[^"\\\\]|\\\\.)*)"`));
+  return m ? m[1].replace(/\\(.)/g, '$1') : null;
+}
+
+async function kumaMonitors() {
+  const res = await fetch(`${KUMA_URL}/metrics`, {
+    headers: { Authorization: `Basic ${Buffer.from(`:${KUMA_API_KEY}`).toString('base64')}` },
+    signal: AbortSignal.timeout(10_000),
+  });
+  if (res.status === 401) throw new Error('clave incorrecta, HTTP 401');
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+  const monitors = new Map(); // name -> { status, ms }
+  for (const line of (await res.text()).split('\n')) {
+    const m = line.match(/^(monitor_status|monitor_response_time)\{(.*)\}\s+(\S+)$/);
+    if (!m) continue;
+    const name = labelOf(m[2], 'monitor_name');
+    if (!name) continue;
+    const entry = monitors.get(name) || {};
+    if (m[1] === 'monitor_status') entry.status = Number(m[3]);
+    else entry.ms = Number(m[3]);
+    monitors.set(name, entry);
+  }
+  return [...monitors].filter(([, v]) => v.status !== undefined);
+}
+
+async function statusReport() {
+  if (!KUMA_URL || !KUMA_API_KEY) return '⚠️ Falta KUMA_URL o KUMA_API_KEY en bot.env';
+
+  let monitors;
+  try {
+    monitors = await kumaMonitors();
+  } catch (err) {
+    console.error('/status failed:', err.message);
+    return `⚠️ No puedo leer Uptime Kuma (${err.message})`;
+  }
+  if (monitors.length === 0) return '⚠️ Uptime Kuma no tiene monitores activos';
+
+  const state = (s) => KUMA_STATES[s] || { icon: '❔', label: `estado ${s}`, rank: 0 };
+  monitors.sort(([a, x], [b, y]) => state(x.status).rank - state(y.status).rank || a.localeCompare(b, 'es'));
+
+  const ok = monitors.filter(([, v]) => v.status === 1).length;
+  const { date, time } = localNow();
+  const header = ok === monitors.length
+    ? `🟢 *Todo OK* (${ok}/${monitors.length})`
+    : `🔴 *${monitors.length - ok} con problemas* (${ok}/${monitors.length} OK)`;
+
+  const lines = monitors.map(([name, v]) => {
+    const s = state(v.status);
+    const detail = v.status === 1
+      ? (Number.isFinite(v.ms) && v.ms > 0 ? ` · ${Math.round(v.ms)} ms` : '')
+      : ` — ${s.label}`;
+    return `${s.icon} ${name}${detail}`;
+  });
+
+  return [`🖥️ *Estado* · ${date.slice(8, 10)}/${date.slice(5, 7)} ${time}`, header, '', ...lines].join('\n');
 }
 
 // --- Daily reminders ---------------------------------------------------------
@@ -167,7 +304,7 @@ async function checkReminders() {
   for (const key of sentToday) if (!key.startsWith(date)) sentToday.delete(key);
 }
 
-// "doneCommand" (e.g. "!agua") cancels that reminder for today.
+// "doneCommand" (e.g. "/agua") cancels that reminder for today.
 // onlyInItsChat: accept it only when written in the reminder's own chat.
 // Kept in memory: if the bot restarts that day, the reminder is armed again.
 async function markReminderDone(session, chatId, msg, text, markSeen, onlyInItsChat) {
