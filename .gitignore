@@ -37,6 +37,11 @@
 !/docker/waha/bot/
 /docker/waha/bot/node_modules/
 
+# --- qBittorrent disk guard ----------------------------------------------------
+# Our own script (cron, every minute): stops every torrent when the disk runs
+# low. It reads its secrets from the env files, so it holds none itself.
+!/docker/qbittorrent/disk-guard.sh
+
 # --- Safety net --------------------------------------------------------------
 # These rules come last so they win over any "!" rule above. They catch
 # secrets and state even if they end up inside an allowlisted folder.

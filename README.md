@@ -34,7 +34,7 @@ Every service lives in its own folder under [`docker/`](docker/) with a single `
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/sonarr.svg" width="32" /> | [**Sonarr**](docker/sonarr/compose.yml) | TV library management and calendar |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/bazarr.svg" width="32" /> | [**Bazarr**](docker/bazarr/compose.yml) | Subtitles for the movie and TV library |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/prowlarr.svg" width="32" /> | [**Prowlarr**](docker/prowlarr/compose.yml) | Indexer manager |
-| <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/qbittorrent.svg" width="32" /> | [**qBittorrent**](docker/qbittorrent/compose.yml) | Download client with minimal seeding |
+| <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/qbittorrent.svg" width="32" /> | [**qBittorrent**](docker/qbittorrent/compose.yml) | Download client with minimal seeding, plus a [disk guard](docker/qbittorrent/disk-guard.sh) that stops every torrent and sends a WhatsApp alert when free space drops below 30 GB |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/flaresolverr.svg" width="32" /> | [**FlareSolverr**](docker/flaresolverr/compose.yml) | Helper proxy for Prowlarr |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/whatsapp.svg" width="32" /> | [**WAHA**](docker/waha/compose.yml) | WhatsApp HTTP API (GOWS engine, no browser) plus a small [bot](docker/waha/bot/index.js) that answers through it (`/status` lists every service's health from Uptime Kuma, `/jitsi` posts a Jitsi meeting link in any chat, `/help` lists the commands) |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/uptime-kuma.svg" width="32" /> | [**Uptime Kuma**](docker/uptime-kuma/compose.yml) | Checks every service and sends a WhatsApp alert (via WAHA) when one goes down |
@@ -98,6 +98,7 @@ Every stack follows the same rules:
 | 🐳 | **`docker.sock` only where strictly needed** (Portainer and autoheal) |
 | 📼 | **Read-only media.** Plex mounts the library `:ro`, so it can never modify or delete files |
 | ❤️‍🩹 | **Self-healing.** Healthchecks + `autoheal=true` restart anything that hangs |
+| 💾 | **Downloads can't fill the disk.** A cron job stops all torrents below 30 GB free, so DNS and the rest keep working |
 | 🚪 | **Zero port forwarding.** Nothing is exposed on the router; remote access only through a VPN |
 | 🌐 | **LAN only.** Most web UIs are published on IPv4 inside the local network |
 
@@ -119,7 +120,9 @@ Every stack follows the same rules:
 │   ├── plex/                 compose.yml
 │   ├── portainer/            compose.yml
 │   ├── prowlarr/             compose.yml
-│   ├── qbittorrent/          compose.yml
+│   ├── qbittorrent/
+│   │   ├── compose.yml
+│   │   └── disk-guard.sh          ← cron: stops all torrents below 30 GB free
 │   ├── radarr/               compose.yml
 │   ├── sonarr/               compose.yml
 │   ├── uptime-kuma/          compose.yml
