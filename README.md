@@ -12,7 +12,7 @@
 <img src="https://img.shields.io/badge/Docker%20Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker Compose" />
 <img src="https://img.shields.io/badge/Raspberry%20Pi%20OS-Debian-A81D33?style=for-the-badge&logo=debian&logoColor=white" alt="Raspberry Pi OS (Debian)" />
 <br />
-<img src="https://img.shields.io/badge/services-14-2fd158?style=for-the-badge&labelColor=0d0d0f" alt="14 services" />
+<img src="https://img.shields.io/badge/services-15-2fd158?style=for-the-badge&labelColor=0d0d0f" alt="15 services" />
 <img src="https://img.shields.io/badge/open%20ports-0-ff9500?style=for-the-badge&labelColor=0d0d0f" alt="0 open ports" />
 <img src="https://img.shields.io/badge/secrets%20in%20repo-0-ff3b30?style=for-the-badge&labelColor=0d0d0f" alt="0 secrets in repo" />
 
@@ -30,6 +30,7 @@ Every service lives in its own folder under [`docker/`](docker/) with a single `
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/nginx-proxy-manager.svg" width="32" /> | [**Nginx Proxy Manager**](docker/nginx-proxy-manager/compose.yml) | Reverse proxy: reach every service by name (`service.lan`) instead of `IP:port` |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/homepage.png" width="32" /> | [**Homepage**](docker/homepage/compose.yml) | Custom-themed dashboard with live status and stats for every service |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/plex.svg" width="32" /> | [**Plex**](docker/plex/compose.yml) | Media server for the TVs and phones at home |
+| <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/jellyfin.svg" width="32" /> | [**Jellyfin**](docker/jellyfin/compose.yml) | Open-source media server on the same library, for the TVs with a Jellyfin app |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/radarr.svg" width="32" /> | [**Radarr**](docker/radarr/compose.yml) | Movie library management |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/sonarr.svg" width="32" /> | [**Sonarr**](docker/sonarr/compose.yml) | TV library management and calendar |
 | <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/bazarr.svg" width="32" /> | [**Bazarr**](docker/bazarr/compose.yml) | Subtitles for the movie and TV library |
@@ -61,7 +62,7 @@ flowchart LR
             RS["Radarr · Sonarr"]
             BZ["Bazarr<br/>subtitles"]
             QB["qBittorrent"]
-            PX["Plex"]
+            PX["Plex · Jellyfin"]
         end
 
         DATA[("💾 /srv/data<br/>media + downloads")]
@@ -96,7 +97,7 @@ Every stack follows the same rules:
 | 👤 | **No root.** Media services run as a dedicated system user: no login shell, no sudo, no Docker access |
 | 🔒 | **`no-new-privileges`** and **RAM/CPU limits** wherever possible |
 | 🐳 | **`docker.sock` only where strictly needed** (Portainer and autoheal) |
-| 📼 | **Read-only media.** Plex mounts the library `:ro`, so it can never modify or delete files |
+| 📼 | **Read-only media.** Plex and Jellyfin mount the library `:ro`, so they can never modify or delete files |
 | ❤️‍🩹 | **Self-healing.** Healthchecks + `autoheal=true` restart anything that hangs |
 | 💾 | **Downloads can't fill the disk.** A cron job stops all torrents below 30 GB free, so DNS and the rest keep working |
 | 🚪 | **Zero port forwarding.** Nothing is exposed on the router; remote access only through a VPN |
@@ -116,6 +117,7 @@ Every stack follows the same rules:
 │   │   ├── compose.yml
 │   │   ├── homepage.env.example   ← template for the secrets
 │   │   └── config/                ← dashboard YAML, CSS theme and JS
+│   ├── jellyfin/             compose.yml
 │   ├── nginx-proxy-manager/  compose.yml
 │   ├── plex/                 compose.yml
 │   ├── portainer/            compose.yml

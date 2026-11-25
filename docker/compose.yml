@@ -36,6 +36,7 @@ include:
 
   # Media
   - plex/compose.yml
+  - jellyfin/compose.yml
   - radarr/compose.yml
   - sonarr/compose.yml
   - bazarr/compose.yml
